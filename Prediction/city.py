@@ -6,7 +6,7 @@ class CityModel:
     def __init__(self, name):
         self.name = name            # Nome da cidade
         self.years = {}             # Meses dos anos Ex: {2022: [12, 3, 4, 5, ...], 2023: [43, 5, 6..], ...}
-        self.totalPerYears = {}     # Total focos nos meses dos anos Ex: {2014: 3000, 2015: 1000, ...}
+        self.totalPerYears = {}     # Total clima nos meses dos anos Ex: {2014: 3000, 2015: 1000, ...}
         self.monthlyAverage = []    # Media de de cada mes Ex: [12, 3, 6, ...]
         self.monthlyPredict = []
         self.predictedCurrentYear = 0

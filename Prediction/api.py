@@ -42,7 +42,7 @@ class Requester:
     def requestPost(self, url, headers=None, data=None):
         self.__responseCode = 0
         if data == None:
-            raise Exception('Post data parameter cant be None.')
+            raise Exception('Post request_data parameter cant be None.')
 
         requisition = urllib.request.Request(url, method='POST', data=data.encode('utf-8'))
         requisition.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36')

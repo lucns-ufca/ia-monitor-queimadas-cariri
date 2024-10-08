@@ -1,48 +1,48 @@
 import json
 import os
 import time
+import numpy as np
 from datetime import datetime
-
 from constants import VERIFY_YEARS_COUNT
 from city import CityModel
-
-import numpy as np
 from sklearn import linear_model
 from sklearn import preprocessing
 from sklearn import tree
 from sklearn import metrics
 
+
 class DataAnalyzes:
     def __init__(self):
-        self.datasetFolder = 'data'
-        self.totalChapadaAraripe = 0        # Total de focos da chapada do araripe nos ultimos VERIFY_YEARS_COUNT anos
-        self.occurredCurrentYear = 0        # Total do ano atual
-        self.predictCurrentYear = 0         # Media anual final
-        self.predictChapadaAraripe = []     # Previsao de queimadas em cada mes, para a chapada do araripe
-        self.occurredChapadaAraripe = []    # Total de focos ocorridos no ano atual, por mes
-        self.annualTotalOccurred = {}       # Total de focos ocorridos por ano
-        self.cityModels = {}                # Dicionario de cidades
-        self.dataChapadaAraripe = {}        # dados dos totais sobre os meses do ano atual}
-        self.dataCities = []                # dados a serem enviados pro back-end referentes as cidades (lista de dados de cidaddes)
+        self.baseDir = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
+        self.datasetFolder = f'{self.baseDir}/filtered'
+        self.totalChapadaAraripe = 0  # Total de clima da chapada do araripe nos ultimos VERIFY_YEARS_COUNT anos
+        self.occurredCurrentYear = 0  # Total do ano atual
+        self.predictCurrentYear = 0  # Media anual final
+        self.predictChapadaAraripe = []  # Previsao de queimadas em cada mes, para a chapada do araripe
+        self.occurredChapadaAraripe = []  # Total de clima ocorridos no ano atual, por mes
+        self.annualTotalOccurred = {}  # Total de clima ocorridos por ano
+        self.cityModels = {}  # Dicionario de cidades
+        self.dataChapadaAraripe = {}  # dados dos totais sobre os meses do ano atual}
+        self.dataCities = []  # dados a serem enviados pro back-end referentes as cidades (lista de dados de cidaddes)
 
     def analyze(self):
         self.occurredChapadaAraripe.clear()
         self.predictChapadaAraripe.clear()
         for i in range(0, 12): self.occurredChapadaAraripe.append(0)
 
-        if not os.path.exists('release'):
-            os.mkdir('release')
+        if not os.path.exists(f'{self.baseDir}/release'):
+            os.mkdir(f'{self.baseDir}/release')
 
         self.occurredCurrentYear = 0
         currentYear = datetime.now().year
         for year in range(currentYear - VERIFY_YEARS_COUNT, currentYear + 1):
             if year < currentYear:
                 self.annualTotalOccurred[year] = 0
-            for fileName in os.listdir(f'{self.datasetFolder}/{year}'): # fileName Eg:= Salitre.json
+            for fileName in os.listdir(f'{self.datasetFolder}/{year}'):  # fileName Eg:= Salitre.json
                 filePath = f'{self.datasetFolder}/{year}/{fileName}'
                 fileDataset = open(filePath, 'r', encoding="utf-8")
-                if self.datasetFolder == 'data':
-                    dataset = json.loads(fileDataset.read())['data']
+                if self.datasetFolder == 'request_data':
+                    dataset = json.loads(fileDataset.read())['request_data']
                 else:
                     dataset = json.loads(fileDataset.read())
                 fileDataset.close()
@@ -61,7 +61,6 @@ class DataAnalyzes:
                         self.occurredCurrentYear += 1
                     else:
                         self.totalChapadaAraripe += 1
-
 
         for cityName in self.cityModels:
             cityModel = self.cityModels[cityName]
@@ -82,7 +81,7 @@ class DataAnalyzes:
 
             count = 0
             for items in cityModel.years.items():
-                months = items[1] # 0 = 2022, 1 = [23, 45, 45,...]
+                months = items[1]  # 0 = 2022, 1 = [23, 45, 45,...]
                 totalPerYears = cityModel.totalPerYears[items[0]]
                 if currentYear != int(items[0]):
                     count += totalPerYears
@@ -101,9 +100,9 @@ class DataAnalyzes:
             jsonMonths = []
             for index in range(0, 12):
                 jsonMonths.append({"fireOccurrences": item[1].years[str(currentYear)][index], "firesPredicted": item[1].monthlyPredict[index]})
-            jsonObject = {"timestamp": timestamp, "date_time": dateTime, 'city': item[0], 'prediction_total': item[1].predictedCurrentYear, 'occurred_total': item[1].totalOccurrencesCurrentYear, 'months': jsonMonths}
+            jsonObject = {"timestamp": timestamp, "dateTime": dateTime, 'city': item[0], 'predictionTotal': item[1].predictedCurrentYear, 'occurredTotal': item[1].totalOccurrencesCurrentYear, 'months': jsonMonths}
             self.dataCities.append(jsonObject)
-            file = open(f'release/{item[0]}.json', 'w', encoding="utf-8")
+            file = open(f'{self.baseDir}/release/{item[0]}.json', 'w', encoding="utf-8")
             json.dump(jsonObject, file, ensure_ascii=False, indent=4)
             file.close()
 
@@ -151,11 +150,10 @@ class DataAnalyzes:
         print(f'_________________________________________________________________________________________')
         print()
 
-
-        self.dataChapadaAraripe = {"timestamp": timestamp, "date_time": dateTime, 'city': "Chapada do Araripe", 'prediction_total':  self.predictCurrentYear, 'occurred_total': self.occurredCurrentYear, 'months': jsonMonths}
-        if not os.path.exists('release'):
-            os.mkdir('release')
-        file = open('release/Chapada do Araripe.json', 'w', encoding="utf-8")
+        self.dataChapadaAraripe = {"timestamp": timestamp, "dateTime": dateTime, 'city': "Chapada do Araripe", 'predictionTotal': self.predictCurrentYear, 'occurredTotal': self.occurredCurrentYear, 'months': jsonMonths}
+        if not os.path.exists(f'{self.baseDir}/release'):
+            os.mkdir(f'{self.baseDir}/release')
+        file = open(f'{self.baseDir}/release/Chapada do Araripe.json', 'w', encoding="utf-8")
         json.dump(self.dataChapadaAraripe, file, ensure_ascii=False, indent=4)
         file.close()
 
@@ -180,7 +178,7 @@ class DataAnalyzes:
                     years[year][month] += self.cityModels[cityName].years[str(year)][month]
         modelsName = [
             'POLYNOMIAL_REGRESSION', 'RIDGE_REGRESSION', 'LINEAR_REGRESSION', 'LASSO_REGRESSION',
-            'ELASTIC_NET_REGRESSION', 'DECISION_TREE_REGRESSION' #, 'LOGISTIC_REGRESSION'
+            'ELASTIC_NET_REGRESSION', 'DECISION_TREE_REGRESSION'  #, 'LOGISTIC_REGRESSION'
         ]
         dictModelsValuesMonths = {}
         for modelName in modelsName:
@@ -212,8 +210,8 @@ class DataAnalyzes:
         x = np.array(numbers[:-1]).reshape(-1, 1)
         y = np.array(numbers[1:])
         a = np.array([[numbers[-1]]])
-        if modelType == 'LOGISTIC_REGRESSION': # not working
-            model = linear_model.LogisticRegression( random_state=len(numbers))
+        if modelType == 'LOGISTIC_REGRESSION':  # not working
+            model = linear_model.LogisticRegression(random_state=len(numbers))
             model.fit(x, y)
             value = model.predict(a)
             return int(value[0])
