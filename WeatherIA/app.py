@@ -33,11 +33,11 @@ def main(isRaspberry):
             if now.hour == 0 and now.minute == 0 and now.second == 0:
                 awaitingUpdate = True
                 print()
-                GPIO.output(LED_PIN, GPIO.HIGH)
+                if isRaspberry: GPIO.output(LED_PIN, GPIO.HIGH)
                 weather.verifyDaysWithoutRain()
             elif now.minute == 5 or now.minute == 20 or now.minute == 35 or now.minute == 50:
                 print()
-                GPIO.output(LED_PIN, GPIO.HIGH)
+                if isRaspberry: GPIO.output(LED_PIN, GPIO.HIGH)
                 weather.updateWeather()
                 sender.sendWeather()
                 count = getCountDownSeconds()
@@ -45,7 +45,7 @@ def main(isRaspberry):
             elif now.hour == 0 and now.minute == 30 and awaitingUpdate:
                 awaitingUpdate = False
                 print()
-                GPIO.output(LED_PIN, GPIO.HIGH)
+                if isRaspberry: GPIO.output(LED_PIN, GPIO.HIGH)
                 weather.updateForecast()
                 sender.sendForecast()
 
