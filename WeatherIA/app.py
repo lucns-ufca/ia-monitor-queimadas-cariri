@@ -1,3 +1,4 @@
+import json
 import traceback
 import time
 from datetime import datetime
@@ -18,7 +19,7 @@ def main(isRaspberry):
         GPIO.output(LED_PIN, GPIO.HIGH)
     weather = WeatherApi()
     weather.updateWeather()
-    weather.updateForecast()
+    #weather.updateForecast()
     print("Sending to back-end...")
     sender = Sender(weather.arrayToSendWeather, weather.arrayToSendProbabillity)
     sender.sendData()

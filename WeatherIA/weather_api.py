@@ -40,7 +40,7 @@ class WeatherApi:
         if not os.path.exists('release'):
             os.mkdir('release')
         file = open(f'{self.baseDir}/release/AllCitiesForecast.json', 'w', encoding="utf-8")
-        json.dump(self.arrayToSendProbabillity, file, ensure_ascii=False, indent=4)
+        json.dump(self.arrayToSendProbabillity, file, indent=4, ensure_ascii=False)
         file.close()
 
     def updateWeather(self):
@@ -64,7 +64,7 @@ class WeatherApi:
         if not os.path.exists(f'{self.baseDir}/release'):
             os.mkdir(f'{self.baseDir}/release')
         file = open(f'{self.baseDir}/release/AllCitiesWeather.json', 'w', encoding="utf-8")
-        json.dump(self.arrayToSendWeather, file, ensure_ascii=False, indent=4)
+        json.dump(self.arrayToSendWeather, file, indent=4, ensure_ascii=False)
         file.close()
 
     def removeRest(self, jsonArray):
@@ -99,7 +99,7 @@ class WeatherApi:
         for hourData in listForecastHours:
             data = {
                 'timestamp': hourData['time_epoch'], 'dateTime': hourData['time'], 'temperature': hourData['temp_c'],
-                'humidity': hourData['humidity'], 'uvIndex': hourData['uv'], 'precipitation': hourData['precip_mm'], 'cloud': None, 'carbonMonoxide': None,
+                'humidity': hourData['humidity'], 'uvIndex': int(hourData['uv']), 'precipitation': int(hourData['precip_mm']), 'cloud': None, 'carbonMonoxide': None,
                 'daysWithoutRain': daysWithoutRain, 'fireRisk': self.calculateProbability(hourData['temp_c'], hourData['humidity'], daysWithoutRain, hourData['uv'])
             }
             jsonCity['forecast'].append(data)
@@ -107,7 +107,7 @@ class WeatherApi:
 
         filePath = f'{self.baseDir}/forecast/{city[0]}.json'
         file = open(filePath, 'w', encoding="utf-8")
-        json.dump(jsonCity, file, ensure_ascii=False, indent=4)
+        json.dump(jsonCity, file, indent=4, ensure_ascii=False)
         file.close()
         return jsonCity
 
@@ -139,7 +139,7 @@ class WeatherApi:
                 hadPrecipitation = False
         jsonItem = {
             'timestamp': current['last_updated_epoch'], 'dateTime': current['last_updated'], 'city': city[0], 'temperature': current['temp_c'], 'humidity': current['humidity'],
-            'uvIndex': current['uv'], 'precipitation': current['precip_mm'], 'cloud': current['cloud'], 'carbonMonoxide': current['air_quality']['co'], 'daysWithoutRain': daysWithoutRain,
+            'uvIndex': int(current['uv']), 'precipitation': int(current['precip_mm']), 'cloud': current['cloud'], 'carbonMonoxide': current['air_quality']['co'], 'daysWithoutRain': daysWithoutRain,
             'fireRisk': self.calculateProbability(current['temp_c'], current['humidity'], daysWithoutRain, current['uv'])
         }
 
@@ -152,7 +152,7 @@ class WeatherApi:
         jsonCity['daysWithoutRain'] = daysWithoutRain
         jsonCity['hadPrecipitation'] = hadPrecipitation
         file = open(filePath, 'w', encoding="utf-8")
-        json.dump(jsonCity, file, ensure_ascii=False, indent=4)
+        json.dump(jsonCity, file, indent=4, ensure_ascii=False)
         file.close()
 
         return jsonItem
@@ -169,6 +169,6 @@ class WeatherApi:
             if not jsonCity['hadPrecipitation']:
                 jsonCity['daysWithoutRain'] += 1
             file = open(filePath, 'w', encoding="utf-8")
-            json.dump(jsonCity, file, ensure_ascii=False, indent=4)
+            json.dump(jsonCity, file, indent=4, ensure_ascii=False)
             file.close()
         time.sleep(1)
