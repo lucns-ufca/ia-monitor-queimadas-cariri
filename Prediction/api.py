@@ -46,6 +46,7 @@ class Requester:
 
         requisition = urllib.request.Request(url, method='POST', data=data.encode('utf-8'))
         requisition.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36')
+        requisition.add_header('content-type', 'application/json')
         if headers is not None:
             for header in headers.items():
                 requisition.add_header(header[0], header[1])

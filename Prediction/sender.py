@@ -8,28 +8,23 @@ class Sender:
     def __init__(self, dataChapadaAraripe, dataCities):
         self.__dataChapadaAraripe = dataChapadaAraripe
         self.__dataCities = dataCities
-        self.__url = 'https://lucns.io/apps/monitor_queimadas_cariri/prediction/predictions.php'
+        #self.__url = 'https://lucns.io/apps/monitor_queimadas_cariri/prediction/predictions.php'
+        self.__url = 'https://monitorqueimadas.duckdns.org/predictions'
         self.__requester = Requester()
         self.baseDir = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
 
     def sendDataGeneral(self):
-        print('Sending general request_data')
+        print('Sending general data')
         data = []
-        #request_data.append(self.__dataChapadaAraripe)
         for d in self.__dataCities: data.append(d)
-
-        file = open(f'{self.baseDir}/release/AllCitiesPredictions.json', 'w', encoding="utf-8")
-        json.dump(data, file, ensure_ascii=False, indent=4)
-        file.close()
-
-        self.__sentInternal(self.__url, json.dumps(data))
+        self.__sentInternal(self.__url, json.dumps(data, ensure_ascii=False))
 
     def sendData(self):
-        print(f'Sending request_data from: {self.__dataChapadaAraripe["city"]}', end=' ')
-        self.__sentInternal(self.__url, json.dumps(self.__dataChapadaAraripe))
+        print(f'Sending data from: {self.__dataChapadaAraripe["city"]}', end=' ')
+        self.__sentInternal(self.__url, json.dumps(self.__dataChapadaAraripe, ensure_ascii=False))
         for data in self.__dataCities:
-            print(f'Sending request_data from: {data["city"]}', end=' ')
-            self.__sentInternal(self.__url, json.dumps(data))
+            print(f'Sending data from: {data["city"]}', end=' ')
+            self.__sentInternal(self.__url, json.dumps(data, ensure_ascii=False))
             time.sleep(1)
 
     def __sentInternal(self, url, data):
@@ -39,7 +34,7 @@ class Sender:
             if retries > 0: print(f'Attempt {retries + 1}', end='. ')
             retries += 1
             if retries == 10:
-                print(f'Fail send request_data from {data["city"]}')
+                print(f'Fail send data from {data["city"]}')
                 return
             self.__requester.requestPost(url, data=data)
             responseCode = self.__requester.getResponseCode()
