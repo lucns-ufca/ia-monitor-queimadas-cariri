@@ -27,12 +27,12 @@ class WeatherApi:
         count = 0
         for city in CITIES_COORDINATES.items():
             count += 1
-            print(f'{count} - Requesting forecast request_data for: {city[0]}', end=' ')
+            print(f'{count} - Requesting forecast data for: {city[0]}', end=' ')
             url = f'{self.__url}v1/forecast.json?key=a8856d705d3b4b17b25151225240605&q={city[1]}&aqi=yes'
             forecast = self.downloadData(url)
             if forecast is None:
-                # raise Exception(f'Fail request request_data city {city[0]}')
-                print(f'Error while trying request weather request_data from {city[0]}')
+                # raise Exception(f'Fail request data city {city[0]}')
+                print(f'Error while trying request weather data from {city[0]}')
             else:
                 self.arrayToSendProbabillity.append(self.retrieveForecastContent(self.getDaysWithoutRainFromCity(city[0]), forecast, city))
             time.sleep(1)
@@ -40,7 +40,7 @@ class WeatherApi:
         if not os.path.exists('release'):
             os.mkdir('release')
         file = open(f'{self.baseDir}/release/AllCitiesForecast.json', 'w', encoding="utf-8")
-        json.dump(self.arrayToSendProbabillity, file, indent=4, ensure_ascii=False)
+        json.dump(self.arrayToSendProbabillity, file, ensure_ascii=False, indent=4)
         file.close()
 
     def updateWeather(self):
@@ -49,12 +49,12 @@ class WeatherApi:
         count = 0
         for city in CITIES_COORDINATES.items():
             count += 1
-            print(f'{count} - Requesting weather request_data for: {city[0]}', end=' ')
+            print(f'{count} - Requesting weather data for: {city[0]}', end=' ')
             url = f'{self.__url}v1/current.json?key=a8856d705d3b4b17b25151225240605&q={city[1]}&aqi=yes'
             data = self.downloadData(url)
             if data is None:
-                # raise Exception(f'Fail request request_data city {city[0]}')
-                print(f'Error while trying request weather request_data from {city[0]}')
+                # raise Exception(f'Fail request data city {city[0]}')
+                print(f'Error while trying request weather data from {city[0]}')
                 continue
             else:
                 weather = self.retrieveWeatherContent(data, city)
@@ -64,7 +64,7 @@ class WeatherApi:
         if not os.path.exists(f'{self.baseDir}/release'):
             os.mkdir(f'{self.baseDir}/release')
         file = open(f'{self.baseDir}/release/AllCitiesWeather.json', 'w', encoding="utf-8")
-        json.dump(self.arrayToSendWeather, file, indent=4, ensure_ascii=False)
+        json.dump(self.arrayToSendWeather, file, ensure_ascii=False, indent=4)
         file.close()
 
     def removeRest(self, jsonArray):
@@ -99,7 +99,7 @@ class WeatherApi:
         for hourData in listForecastHours:
             data = {
                 'timestamp': hourData['time_epoch'], 'dateTime': hourData['time'], 'temperature': hourData['temp_c'],
-                'humidity': hourData['humidity'], 'uvIndex': int(hourData['uv']), 'precipitation': int(hourData['precip_mm']), 'cloud': None, 'carbonMonoxide': None,
+                'humidity': hourData['humidity'], 'uvIndex': hourData['uv'], 'precipitation': hourData['precip_mm'], 'cloud': None, 'carbonMonoxide': None,
                 'daysWithoutRain': daysWithoutRain, 'fireRisk': self.calculateProbability(hourData['temp_c'], hourData['humidity'], daysWithoutRain, hourData['uv'])
             }
             jsonCity['forecast'].append(data)
@@ -107,7 +107,7 @@ class WeatherApi:
 
         filePath = f'{self.baseDir}/forecast/{city[0]}.json'
         file = open(filePath, 'w', encoding="utf-8")
-        json.dump(jsonCity, file, indent=4, ensure_ascii=False)
+        json.dump(jsonCity, file, ensure_ascii=False, indent=4)
         file.close()
         return jsonCity
 
@@ -139,20 +139,20 @@ class WeatherApi:
                 hadPrecipitation = False
         jsonItem = {
             'timestamp': current['last_updated_epoch'], 'dateTime': current['last_updated'], 'city': city[0], 'temperature': current['temp_c'], 'humidity': current['humidity'],
-            'uvIndex': int(current['uv']), 'precipitation': int(current['precip_mm']), 'cloud': current['cloud'], 'carbonMonoxide': current['air_quality']['co'], 'daysWithoutRain': daysWithoutRain,
+            'uvIndex': current['uv'], 'precipitation': current['precip_mm'], 'cloud': current['cloud'], 'carbonMonoxide': current['air_quality']['co'], 'daysWithoutRain': daysWithoutRain,
             'fireRisk': self.calculateProbability(current['temp_c'], current['humidity'], daysWithoutRain, current['uv'])
         }
 
-        if 'request_data' not in jsonCity:
-            jsonCity['request_data'] = []
-        jsonArray = jsonCity['request_data']
+        if 'data' not in jsonCity:
+            jsonCity['data'] = []
+        jsonArray = jsonCity['data']
         jsonArray.append(jsonItem)
         self.removeRest(jsonArray)
         jsonCity['city'] = city[0]
         jsonCity['daysWithoutRain'] = daysWithoutRain
         jsonCity['hadPrecipitation'] = hadPrecipitation
         file = open(filePath, 'w', encoding="utf-8")
-        json.dump(jsonCity, file, indent=4, ensure_ascii=False)
+        json.dump(jsonCity, file, ensure_ascii=False, indent=4)
         file.close()
 
         return jsonItem
@@ -169,6 +169,6 @@ class WeatherApi:
             if not jsonCity['hadPrecipitation']:
                 jsonCity['daysWithoutRain'] += 1
             file = open(filePath, 'w', encoding="utf-8")
-            json.dump(jsonCity, file, indent=4, ensure_ascii=False)
+            json.dump(jsonCity, file, ensure_ascii=False, indent=4)
             file.close()
         time.sleep(1)
